@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="200" viewBox="0 0 800 200">
+  <!-- Dark background -->
+  <rect width="800" height="200" fill="#0d1117" rx="8"/>
+
+  <!-- Neon border (outer glow) -->
+  <rect x="3" y="3" width="794" height="194" fill="none" stroke="#00ff41" stroke-width="1.5" rx="7" opacity="0.4"/>
+  <rect x="8" y="8" width="784" height="184" fill="none" stroke="#00ff41" stroke-width="0.5" rx="5" opacity="0.15"/>
+
+  <!-- Scanline effect -->
+  <line x1="0" y1="60" x2="800" y2="60" stroke="#00ff41" stroke-width="0.3" opacity="0.08"/>
+  <line x1="0" y1="100" x2="800" y2="100" stroke="#00ff41" stroke-width="0.3" opacity="0.08"/>
+  <line x1="0" y1="140" x2="800" y2="140" stroke="#00ff41" stroke-width="0.3" opacity="0.08"/>
+
+  <!-- Framing brackets - centered on canvas -->
+  <!-- Top-left -->
+  <text x="50" y="35" font-family="'Courier New', Courier, monospace" font-size="16" fill="#00ff41" opacity="0.5">&#x250C;&#x2500;&#x2500;</text>
+  <!-- Top-right -->
+  <text x="750" y="35" font-family="'Courier New', Courier, monospace" font-size="16" fill="#00ff41" opacity="0.5" text-anchor="end">&#x2500;&#x2500;&#x2510;</text>
+  <!-- Bottom-left -->
+  <text x="50" y="175" font-family="'Courier New', Courier, monospace" font-size="16" fill="#00ff41" opacity="0.5">&#x2514;&#x2500;&#x2500;</text>
+  <!-- Bottom-right -->
+  <text x="750" y="175" font-family="'Courier New', Courier, monospace" font-size="16" fill="#00ff41" opacity="0.5" text-anchor="end">&#x2500;&#x2500;&#x2518;</text>
+
+  <!-- v1.0 - inside top-right -->
+  <text x="720" y="50" font-family="'Courier New', Courier, monospace" font-size="10" fill="#00ff41" opacity="0.35" text-anchor="end">v1.0</text>
+
+  <!-- READY - inside bottom-left, mirrored padding from v1.0 -->
+  <text x="80" y="155" font-family="'Courier New', Courier, monospace" font-size="10" fill="#ff66ff" opacity="0.7">&#x2588;&#x2588; READY</text>
+
+  <!-- Main title + cursor treated as one centered unit -->
+  <!-- Title centered slightly left to account for cursor -->
+  <text x="378" y="105" font-family="'Courier New', Courier, monospace" font-size="60" font-weight="bold" fill="#00ff41" text-anchor="middle" letter-spacing="4">SKILL ISSUE</text>
+
+  <!-- Blinking block cursor - one space after title, vertically aligned -->
+  <rect x="608" y="68" width="32" height="42" fill="#00ff41" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;0;0.8" dur="1.2s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- Subtitle - centered -->
+  <text x="400" y="135" font-family="'Courier New', Courier, monospace" font-size="13" fill="#ff00ff" text-anchor="middle" letter-spacing="3">&#x25B8; PORTABLE CLAUDE CODE SKILLS &#x25C2;</text>
+
+  <!-- By line - centered -->
+  <text x="400" y="155" font-family="'Courier New', Courier, monospace" font-size="11" fill="#00ff41" text-anchor="middle" opacity="0.45">by helloblair</text>
+</svg>
