@@ -47,7 +47,7 @@ The single most important decision in a RAG pipeline. Bad chunks = bad retrieval
 
 **Principles:**
 - Chunk at logical boundaries (functions, paragraphs, sections), not arbitrary character counts
-- Each chunk should be independently meaningful — a reader should understand it without surrounding context
+- Each chunk should be independently meaningful, so a reader can understand it without surrounding context
 - Include enough context in metadata to locate the chunk in the original file
 - Preserve overlap between adjacent chunks to avoid losing context at boundaries
 
@@ -55,7 +55,7 @@ The single most important decision in a RAG pipeline. Bad chunks = bad retrieval
 
 Different languages have different natural boundaries. Always prefer structural boundaries over arbitrary splits:
 
-- **COBOL:** Chunk at the paragraph level (within PROCEDURE DIVISION). COBOL's rigid hierarchy — DIVISION → SECTION → PARAGRAPH — makes paragraphs a natural sweet spot.
+- **COBOL:** Chunk at the paragraph level (within PROCEDURE DIVISION). COBOL's rigid hierarchy (DIVISION → SECTION → PARAGRAPH) makes paragraphs a natural sweet spot.
 - **Python:** Chunk at function/class level using AST parsing or regex for `def`/`class` boundaries.
 - **JavaScript/TypeScript:** Chunk at function/class/module export boundaries.
 - **C:** Chunk at function definitions, using `{` `}` brace matching.
@@ -136,6 +136,8 @@ If a chunk is too large, split it further. If too small, consider merging with n
 
 ### Step 3: Generate Embeddings
 
+> **Model note (verify before relying on it):** as of 2026 the `text-embedding-3-small` (1536 dims) and `text-embedding-3-large` (3072 dims) models are still current. Start with `-small` for cost; reach for `-large` only if retrieval quality is lacking. Model names, dimensions, and pricing all drift over time, so confirm the latest in OpenAI's docs.
+
 ```python
 from openai import OpenAI
 
@@ -151,9 +153,9 @@ def embed_texts(texts: list[str], model: str = "text-embedding-3-small") -> list
     return [item.embedding for item in response.data]
 ```
 
-**Batch efficiently.** Don't embed one chunk at a time — batch them. OpenAI allows up to 2048 texts per API call. Process in batches of 100-500 for a good balance of speed and memory.
+**Batch efficiently.** Don't embed one chunk at a time, batch them. OpenAI allows up to 2048 texts per API call. Process in batches of 100-500 for a good balance of speed and memory.
 
-**Track costs.** Count tokens before embedding to estimate costs. For `text-embedding-3-small`, the cost is approximately $0.02 per 1M tokens.
+**Track costs.** Count tokens before embedding to estimate costs. For `text-embedding-3-small` the cost has historically been around $0.02 per 1M tokens, but pricing changes, so check OpenAI's current rates rather than trusting this number.
 
 ### Step 4: Upsert to Pinecone
 
@@ -249,6 +251,10 @@ Format code references as: [filename:line_start-line_end]"""
 
 async def generate_answer(question: str, context: str) -> str:
     response = client.chat.completions.create(
+        # gpt-4o-mini still works in 2026 and is cheap, but newer small models
+        # (e.g. the GPT-5-class mini/nano tiers) may answer better for the same
+        # cost. Swap in whatever current small model fits; keep it pinned so
+        # behavior is reproducible.
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -263,7 +269,7 @@ async def generate_answer(question: str, context: str) -> str:
 
 **Problem: Retrieval returns irrelevant chunks**
 - Check that query embedding uses the SAME model as ingestion embeddings
-- Check chunk quality — are chunks too large (diluted meaning) or too small (no context)?
+- Check chunk quality: are chunks too large (diluted meaning) or too small (no context)?
 - Try rephrasing the query or adding query expansion
 
 **Problem: Embedding dimension mismatch**
@@ -284,5 +290,5 @@ async def generate_answer(question: str, context: str) -> str:
 
 **Problem: Chunks are too large for context window**
 - Calculate total tokens: (avg chunk tokens × top_k) + question + system prompt
-- For GPT-4o-mini with 128K context, this is rarely an issue
+- With modern long-context models (128K+), this is rarely an issue
 - If needed, reduce top_k or truncate chunks

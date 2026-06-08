@@ -29,7 +29,7 @@ git push -u origin main
 Then connect in Vercel:
 - Go to vercel.com/new
 - Import the GitHub repository
-- Vercel auto-detects Next.js — accept defaults
+- Vercel auto-detects Next.js, accept defaults
 - Click Deploy
 
 Your app is now live. Every `git push origin main` triggers a new deploy automatically.
@@ -56,7 +56,7 @@ const apiKey = process.env.API_KEY;
 
 For client-side access (rarely needed, be careful with secrets):
 ```typescript
-// Prefix with NEXT_PUBLIC_ — this exposes the value to the browser
+// Prefix with NEXT_PUBLIC_, this exposes the value to the browser
 const publicValue = process.env.NEXT_PUBLIC_SOME_VALUE;
 ```
 
@@ -88,13 +88,23 @@ export async function POST(request: NextRequest) {
 ## Common Gotchas
 
 ### Serverless Function Timeout
-Vercel's free tier has a 10-second timeout for serverless functions. If your API route involves multiple external calls (e.g., database query + LLM generation), you may hit a 504 error.
+Vercel Functions have a maximum duration. If a function doesn't respond in time, you get a 504 (`FUNCTION_INVOCATION_TIMEOUT`). As of 2026 the caps are much higher than they used to be:
 
-Mitigations:
-- Use faster models or services where possible
-- Reduce the number of sequential external calls
+- **Hobby (free):** 60 seconds (up to 300 seconds with Fluid Compute enabled)
+- **Pro:** 300 seconds
+
+Raise an individual function's limit up to your plan's cap with the `maxDuration` export:
+
+```typescript
+// app/api/query/route.ts
+export const maxDuration = 60; // seconds, within your plan's cap
+```
+
+These caps change over time, so confirm the current numbers in [Vercel's duration docs](https://vercel.com/docs/functions/configuring-functions/duration). Even with headroom, holding a request open for a long time is a poor experience. Mitigations:
 - Stream responses instead of waiting for full completion
-- If all else fails, upgrade to Vercel Pro (25-second timeout)
+- Reduce the number of sequential external calls
+- Use faster models or services where possible
+- For genuinely long jobs, move to a background pattern (a queue, or Vercel Workflows) instead of keeping a request open
 
 ### Build Failures
 Common causes:

@@ -2,70 +2,88 @@
   <img src="assets/banner.svg" alt="Skill Issue" width="800"/>
 </p>
 
-A personal library of reusable [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills and commands — portable across any project.
+A personal library of reusable [Claude Code](https://docs.anthropic.com/en/docs/claude-code) skills and hooks, portable across any project.
 
 ## What's in here?
 
-This repo contains two types of Claude Code extensions:
+Two kinds of Claude Code extension:
 
-- **Skills** — Passive reference files that Claude reads for context and patterns. They inform how Claude approaches specific tasks (deploying, documenting, building pipelines) without you having to re-explain every time.
-- **Commands** — User-invocable actions triggered with `/project:<command>`. These execute a specific workflow on demand.
+- **Skills** (`skills/<name>/SKILL.md`). Reusable instructions Claude loads when they're relevant. Claude Code now has just one Skill concept: a skill is both model-invoked (Claude reads its description and uses it when it fits) and user-invoked (you run it directly with `/<name>`). There's no separate "command" type anymore, and the old `/project:<name>` / `/user:<name>` syntax is gone.
+- **Hooks** (`hooks/`). Small scripts the Claude Code harness runs automatically on an event (configured in `settings.json`). Because the harness runs them and not the model, they fire reliably every time. Hooks aren't skills and don't get symlinked into `~/.claude/skills/`; you wire them up in your settings.
 
 ## Skills
 
-### doc-logging
+### takeaway
+A manually triggered learning journal (`/takeaway [topic]`). Reviews the current conversation, reconstructs what just happened step by step in plain language, and appends it to `takeaways.md`. Study notes and interview prep. Append-only.
 
-Automatically maintains living documentation after every meaningful code change. Creates and appends to two local, gitignored files: a **sprint changelog** (what changed, why, and what it unlocks) and a **codebase audit** (a component-by-component snapshot of the project's current state). Designed to serve as a private developer reference, debugging history, and interview prep material.
+### doc-logging
+On-demand, deliberate project documentation (`/doc-logging`). Writes the rich parts a script cannot: a sprint changelog (what changed, WHY, the tradeoffs) and a component-by-component codebase audit (the project's current-state map). This is the deep-dive companion to the `activity-log` hook below.
 
 ### rag-pipeline
-
-A reference guide and pattern library for building Retrieval-Augmented Generation pipelines from scratch. Covers the full flow: file discovery, chunking strategies (with language-specific examples for COBOL, Python, JS/TS, C, and more), embedding generation with OpenAI, vector storage in Pinecone, semantic search, and LLM answer generation with source citations. Includes a troubleshooting catalog for common failure modes like irrelevant retrieval, dimension mismatches, and hallucination.
+A reference guide and pattern library for building Retrieval-Augmented Generation pipelines: file discovery, language-aware chunking, embeddings, vector storage (Pinecone), retrieval, and cited answer generation, plus a troubleshooting catalog.
 
 ### vercel-deploy
+A deployment checklist and troubleshooting guide for shipping Next.js apps to Vercel: project setup, environment variables, API routes, function duration limits, and the dev-to-production workflow.
 
-A deployment checklist and troubleshooting guide for shipping Next.js applications to Vercel. Covers the deploy-first philosophy, initial project setup, environment variable configuration, API route patterns, serverless function timeout mitigation, and the standard dev-to-production workflow. Includes common gotchas and their fixes.
+## Hooks
 
-## Commands
+### activity-log
+The automatic "what changed" feed. A `PostToolUse` hook that appends one terse, timestamped line per file change Claude makes to `<project>/docs/activity-log.md`, plus a marker when a `git commit` runs. Logs paths and line counts only (never file contents), skips noise, and hides itself from git locally via `.git/info/exclude`. See [`hooks/README.md`](hooks/README.md) for setup and details.
 
-### takeaway
+## The two-tier documentation system
 
-A manually triggered learning journal (`/project:takeaway [topic]`). When invoked, it reviews the current conversation context, reconstructs what just happened, and appends a detailed step-by-step explanation to `takeaways.md` using real file names, function names, and numbers from the session. Written in plain language for a future reader who forgot the context. Doubles as study notes and interview prep.
+`doc-logging` and `activity-log` work together to answer "what's going on with my code?" at two levels:
+
+- The **`activity-log` hook** gives you the always-on, reliable *feed*: every change, as it happens, terse.
+- The **`doc-logging` skill** gives you the *depth* on demand: the "why" behind a change and the big-picture map, the parts a script cannot produce.
+
+Use the hook for breadcrumbs, the skill for the occasional deep entry.
 
 ## Usage
 
-### Import everything into a project
+These instructions assume the repo is cloned at `~/skill-issue`. If you clone it elsewhere, adjust the paths (the hook command also points at `~/skill-issue`).
 
-From your project root:
+### Install skills
 
-```bash
-# Link both skills and commands
-ln -s ~/skill-issue/skills/* .claude/skills/
-ln -s ~/skill-issue/commands/* .claude/skills/
-```
-
-### Import only skills or only commands
+Skills are discovered as `<name>/SKILL.md` folders. Symlink the ones you want into `~/.claude/skills/` (global, every project) or a project's `.claude/skills/`.
 
 ```bash
-# Skills only
-mkdir -p .claude/skills
-ln -s ~/skill-issue/skills/* .claude/skills/
+mkdir -p ~/.claude/skills
 
-# Commands only
-mkdir -p .claude/skills
-ln -s ~/skill-issue/commands/* .claude/skills/
+# All of them
+for s in ~/skill-issue/skills/*/; do
+  ln -s "$s" ~/.claude/skills/"$(basename "$s")"
+done
+
+# Or just the ones you want
+ln -s ~/skill-issue/skills/takeaway     ~/.claude/skills/takeaway
+ln -s ~/skill-issue/skills/doc-logging  ~/.claude/skills/doc-logging
 ```
 
-### Pick and choose individual items
+Restart Claude Code (or start a new session) so it picks up the new skills.
 
-```bash
-mkdir -p .claude/skills
+### Install the activity-log hook
 
-# Just the ones you want
-ln -s ~/skill-issue/skills/doc-logging.md .claude/skills/doc-logging.md
-ln -s ~/skill-issue/skills/vercel-deploy.md .claude/skills/vercel-deploy.md
-ln -s ~/skill-issue/commands/takeaway .claude/skills/takeaway
+The hook lives in `settings.json`, not in `~/.claude/skills/`. Add this to `~/.claude/settings.json` (global) or a project's `.claude/settings.local.json` (one project only):
+
+```json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|NotebookEdit|Bash",
+        "hooks": [
+          { "type": "command", "command": "test -f \"$HOME/skill-issue/hooks/activity-log.py\" && python3 \"$HOME/skill-issue/hooks/activity-log.py\" || true" }
+        ]
+      }
+    ]
+  }
+}
 ```
 
-### Adding new skills
+Claude Code loads hooks at startup, so start a new session (or, in the terminal CLI, review via `/hooks`) to activate it. Full details in [`hooks/README.md`](hooks/README.md).
 
-Drop a new `.md` file into `skills/` (for passive skills) or a new subfolder with a `SKILL.md` into `commands/` (for invocable commands), and update this README. Any project linked to the full directory will pick it up automatically.
+## Adding new extensions
+
+- **A new skill:** create `skills/<name>/SKILL.md` with frontmatter (`name`, `description`, optional `argument-hint`), then symlink it into `~/.claude/skills/`. Update this README.
+- **A new hook:** add a script under `hooks/`, document it in `hooks/README.md`, and reference it from your `settings.json`. Update this README.
