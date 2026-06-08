@@ -1,6 +1,7 @@
 ---
 name: takeaway
-description: Log a detailed learning breakdown to takeaways.md. Use when the user invokes /project:takeaway after something happened that they want to understand — a script ran, a deploy completed, a bug was fixed, a concept clicked. Reviews the current conversation context to reconstruct what happened, explains it step by step in plain language, and appends the entry to the journal. Appends only — never overwrites existing content.
+description: Log a detailed learning breakdown to takeaways.md. Use when the user runs /takeaway after something happened that they want to understand — a script ran, a deploy completed, a bug was fixed, a concept clicked. Reviews the current conversation context to reconstruct what happened, explains it step by step in plain language, and appends the entry to the journal. Appends only — never overwrites existing content.
+argument-hint: "[topic]"
 ---
 
 # Takeaway Logging Skill
@@ -11,7 +12,7 @@ Maintain a learning journal that explains *what happened and why* in plain langu
 
 ## How It Works
 
-1. **Get the topic.** The user provides a topic as the argument (e.g., `/project:takeaway RAG ingestion pipeline`). If no argument is given, ask what the takeaway is about.
+1. **Get the topic.** The user provides a topic as the argument (e.g., `/takeaway RAG ingestion pipeline`). If no argument is given, ask what the takeaway is about.
 
 2. **Review conversation context.** Look back through the current conversation to find the relevant work that was done — commands that ran, code that was written, explanations that were given. This is the raw material for the entry.
 
