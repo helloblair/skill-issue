@@ -8,7 +8,7 @@ the script in this folder.
 ## activity-log.py
 
 The automatic "what changed" feed. On every file edit/create Claude makes, it
-appends one terse, timestamped line to `<project>/docs/ACTIVITY_LOG.md`, and it
+appends one terse, timestamped line to `<project>/docs/activity-log.md`, and it
 drops a marker line whenever a `git commit` runs. It is the reliable companion to
 the on-demand [`doc-logging`](../skills/doc-logging/SKILL.md) skill (which writes
 the rich "why" entries and the codebase map that a script cannot).

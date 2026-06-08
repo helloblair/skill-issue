@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Activity-log hook for Claude Code.
 
-Appends a terse, timestamped breadcrumb to <project>/docs/ACTIVITY_LOG.md every
+Appends a terse, timestamped breadcrumb to <project>/docs/activity-log.md every
 time Claude edits or creates a file, and a commit marker whenever a git commit
 runs. It logs file paths and line counts ONLY, never file contents, so secrets
 never land in the log.
@@ -15,7 +15,7 @@ import json
 import subprocess
 from datetime import datetime
 
-LOG_REL = os.path.join("docs", "ACTIVITY_LOG.md")
+LOG_REL = os.path.join("docs", "activity-log.md")
 
 # Path fragments whose changes are noise (dependencies, build output, vcs).
 IGNORE_FRAGMENTS = (
@@ -30,7 +30,7 @@ IGNORE_FRAGMENTS = (
 
 # Filenames we never log (the log itself, plus noisy lockfiles).
 IGNORE_BASENAMES = (
-    "ACTIVITY_LOG.md",
+    "activity-log.md",
     "bun.lock",
     "package-lock.json",
     "yarn.lock",
@@ -142,7 +142,7 @@ def git_exclude(root):
     if not os.path.isdir(git_dir):
         return
     exclude = os.path.join(git_dir, "info", "exclude")
-    entry = "docs/ACTIVITY_LOG.md"
+    entry = "docs/activity-log.md"
     try:
         existing = ""
         if os.path.exists(exclude):

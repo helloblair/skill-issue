@@ -11,7 +11,7 @@ Maintain a living record of the engineering decisions and the system's current s
 
 This skill is the **deliberate, deep-dive half** of a two-part system:
 
-- The **activity-log hook** (configured in settings.json) automatically appends a terse one-line breadcrumb per file change to `docs/ACTIVITY_LOG.md`. That is the always-on "what changed" feed, and it runs with no model involved.
+- The **activity-log hook** (configured in settings.json) automatically appends a terse one-line breadcrumb per file change to `docs/activity-log.md`. That is the always-on "what changed" feed, and it runs with no model involved.
 - **This skill** writes the parts a script cannot: the *why* behind a change and the component-by-component map. Invoke it at natural breakpoints (a finished feature, a tricky fix, the end of a session), not on every keystroke.
 
 ## What To Do When Invoked
@@ -22,7 +22,7 @@ If the user named a specific change or topic, scope the entry to that. Otherwise
 
 These files are LOCAL-ONLY and gitignored. Do not `git add` them or include them in commits. They exist solely for the developer's private reference.
 
-## File 1: docs/CHANGELOG_SPRINT.md
+## File 1: docs/changelog-sprint.md
 
 Append an entry in this exact format:
 
@@ -44,7 +44,7 @@ Append an entry in this exact format:
 [What this unlocks, fixes, or unblocks]
 ```
 
-## File 2: docs/CODEBASE_AUDIT.md
+## File 2: docs/codebase-audit.md
 
 Append a new section or update an existing one. Organized by component:
 
@@ -84,13 +84,13 @@ On first use, create both files if they don't exist:
 
 ```bash
 mkdir -p docs
-touch docs/CHANGELOG_SPRINT.md docs/CODEBASE_AUDIT.md
+touch docs/changelog-sprint.md docs/codebase-audit.md
 ```
 
 Add to `.gitignore` (the activity-log hook writes a third file in the same folder):
 
 ```
-docs/CHANGELOG_SPRINT.md
-docs/CODEBASE_AUDIT.md
-docs/ACTIVITY_LOG.md
+docs/changelog-sprint.md
+docs/codebase-audit.md
+docs/activity-log.md
 ```
