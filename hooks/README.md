@@ -56,7 +56,7 @@ Add this to `~/.claude/settings.json` (or `~/.claude/settings.local.json`):
       {
         "matcher": "Edit|Write|NotebookEdit|Bash",
         "hooks": [
-          { "type": "command", "command": "python3 \"$HOME/skill-issue/hooks/activity-log.py\"" }
+          { "type": "command", "command": "test -f \"$HOME/skill-issue/hooks/activity-log.py\" && python3 \"$HOME/skill-issue/hooks/activity-log.py\" || true" }
         ]
       }
     ]

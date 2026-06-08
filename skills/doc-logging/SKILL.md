@@ -20,7 +20,7 @@ When the user invokes this skill, APPEND to both files below, covering the most 
 
 If the user named a specific change or topic, scope the entry to that. Otherwise, review the recent conversation and the activity log to reconstruct what was done.
 
-These files are LOCAL-ONLY and gitignored. Do not `git add` them or include them in commits. They exist solely for the developer's private reference.
+These files are LOCAL-ONLY and excluded from git locally (see Setup). Do not `git add` them or include them in commits. They exist solely for the developer's private reference.
 
 ## File 1: docs/changelog-sprint.md
 
@@ -87,10 +87,17 @@ mkdir -p docs
 touch docs/changelog-sprint.md docs/codebase-audit.md
 ```
 
-Add to `.gitignore` (the activity-log hook writes a third file in the same folder):
+Keep them out of git the **local** way, by adding them to `.git/info/exclude`
+rather than the tracked `.gitignore`. `.git/info/exclude` is never committed, so
+this is safe even in a repo you do not own (it never modifies a shared file).
+Use `git rev-parse --git-path info/exclude` so it resolves correctly in worktrees
+and submodules too. This snippet is idempotent:
 
+```bash
+EX="$(git rev-parse --git-path info/exclude)"
+for f in docs/changelog-sprint.md docs/codebase-audit.md docs/activity-log.md; do
+  grep -qxF "$f" "$EX" 2>/dev/null || echo "$f" >> "$EX"
+done
 ```
-docs/changelog-sprint.md
-docs/codebase-audit.md
-docs/activity-log.md
-```
+
+Do NOT add these to the tracked `.gitignore`.

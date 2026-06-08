@@ -47,6 +47,11 @@ def main():
     tool_input = data.get("tool_input") or {}
     root = os.environ.get("CLAUDE_PROJECT_DIR") or data.get("cwd") or os.getcwd()
 
+    # Skip when the tool clearly failed, so we never record a change or a commit
+    # that did not actually happen.
+    if is_failure(data.get("tool_response")):
+        return
+
     if tool == "Bash":
         log_commit(data, tool_input, root)
         return
@@ -65,9 +70,22 @@ def main():
     append(root, "%s  %-9s %s  (+%d/-%d)" % (now().strftime("%H:%M"), verb, rel, added, removed))
 
 
+def is_failure(resp):
+    """Best-effort detection of a failed tool call across the shapes a
+    tool_response can take."""
+    if isinstance(resp, dict):
+        if resp.get("success") is False or resp.get("is_error") is True:
+            return True
+    return False
+
+
 def log_commit(data, tool_input, root):
     cmd = tool_input.get("command", "")
-    if "git commit" not in cmd or "--dry-run" in cmd:
+    if "git commit" not in cmd:
+        return
+    # Avoid false positives: --dry-run does not create a commit, and
+    # "git commit-graph" is a maintenance command, not a commit.
+    if "--dry-run" in cmd or "commit-graph" in cmd:
         return
     # Read the resulting commit's subject directly from git, so this works no
     # matter how the message was supplied (-m, -F, heredoc, editor).
@@ -134,12 +152,36 @@ def append(root, line):
         f.write(line + "\n")
 
 
+def resolve_git_dir(root):
+    """Return the repo's git directory, or None if root is not in a repo.
+
+    Handles worktrees and submodules, where <root>/.git is a FILE containing a
+    'gitdir: <path>' pointer instead of a directory. Without this, the exclude
+    write would silently fail in those setups and the log would leak into
+    git status."""
+    p = os.path.join(root, ".git")
+    if os.path.isdir(p):
+        return p
+    if os.path.isfile(p):
+        try:
+            with open(p, "r", encoding="utf-8", errors="replace") as f:
+                content = f.read().strip()
+        except Exception:
+            return None
+        if content.startswith("gitdir:"):
+            gd = content[len("gitdir:"):].strip()
+            if not os.path.isabs(gd):
+                gd = os.path.normpath(os.path.join(root, gd))
+            return gd
+    return None
+
+
 def git_exclude(root):
     """Keep the log invisible to git in ANY repo by adding it to
-    .git/info/exclude, which is local and never committed. This protects repos
-    we do not own (the log never shows up in their git status)."""
-    git_dir = os.path.join(root, ".git")
-    if not os.path.isdir(git_dir):
+    info/exclude, which is local and never committed. This protects repos we do
+    not own (the log never shows up in their git status)."""
+    git_dir = resolve_git_dir(root)
+    if not git_dir:
         return
     exclude = os.path.join(git_dir, "info", "exclude")
     entry = "docs/activity-log.md"

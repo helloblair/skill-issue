@@ -67,5 +67,10 @@ Maintain a learning journal that explains *what happened and why* in plain langu
 - One takeaway per invocation.
 - Entries can be as long as they need to be — thoroughness over brevity. A 10-step process gets 10 steps.
 - The "Still unclear" field is optional. Include it when the user mentions confusion or open questions. If everything is resolved, leave it out.
-- The file is LOCAL-ONLY and should be gitignored. Do not `git add` it or include it in commits.
-- If `takeaways.md` is not yet in `.gitignore`, add it.
+- The file is LOCAL-ONLY. Do not `git add` it or include it in commits.
+- Keep it out of git the **local** way, by adding it to `.git/info/exclude` (never committed, so it is safe even in a repo you do not own), not the tracked `.gitignore`. This snippet is idempotent and resolves correctly in worktrees/submodules:
+
+  ```bash
+  EX="$(git rev-parse --git-path info/exclude)"
+  grep -qxF "takeaways.md" "$EX" 2>/dev/null || echo "takeaways.md" >> "$EX"
+  ```
