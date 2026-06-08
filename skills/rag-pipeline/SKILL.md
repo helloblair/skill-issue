@@ -136,6 +136,8 @@ If a chunk is too large, split it further. If too small, consider merging with n
 
 ### Step 3: Generate Embeddings
 
+> **Model note (verify before relying on it):** as of 2026 the `text-embedding-3-small` (1536 dims) and `text-embedding-3-large` (3072 dims) models are still current. Start with `-small` for cost; reach for `-large` only if retrieval quality is lacking. Model names, dimensions, and pricing all drift over time, so confirm the latest in OpenAI's docs.
+
 ```python
 from openai import OpenAI
 
@@ -153,7 +155,7 @@ def embed_texts(texts: list[str], model: str = "text-embedding-3-small") -> list
 
 **Batch efficiently.** Don't embed one chunk at a time — batch them. OpenAI allows up to 2048 texts per API call. Process in batches of 100-500 for a good balance of speed and memory.
 
-**Track costs.** Count tokens before embedding to estimate costs. For `text-embedding-3-small`, the cost is approximately $0.02 per 1M tokens.
+**Track costs.** Count tokens before embedding to estimate costs. For `text-embedding-3-small` the cost has historically been around $0.02 per 1M tokens, but pricing changes, so check OpenAI's current rates rather than trusting this number.
 
 ### Step 4: Upsert to Pinecone
 
@@ -249,6 +251,10 @@ Format code references as: [filename:line_start-line_end]"""
 
 async def generate_answer(question: str, context: str) -> str:
     response = client.chat.completions.create(
+        # gpt-4o-mini still works in 2026 and is cheap, but newer small models
+        # (e.g. the GPT-5-class mini/nano tiers) may answer better for the same
+        # cost. Swap in whatever current small model fits; keep it pinned so
+        # behavior is reproducible.
         model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
@@ -284,5 +290,5 @@ async def generate_answer(question: str, context: str) -> str:
 
 **Problem: Chunks are too large for context window**
 - Calculate total tokens: (avg chunk tokens × top_k) + question + system prompt
-- For GPT-4o-mini with 128K context, this is rarely an issue
+- With modern long-context models (128K+), this is rarely an issue
 - If needed, reduce top_k or truncate chunks
