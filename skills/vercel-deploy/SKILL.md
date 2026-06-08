@@ -29,7 +29,7 @@ git push -u origin main
 Then connect in Vercel:
 - Go to vercel.com/new
 - Import the GitHub repository
-- Vercel auto-detects Next.js — accept defaults
+- Vercel auto-detects Next.js, accept defaults
 - Click Deploy
 
 Your app is now live. Every `git push origin main` triggers a new deploy automatically.
@@ -56,7 +56,7 @@ const apiKey = process.env.API_KEY;
 
 For client-side access (rarely needed, be careful with secrets):
 ```typescript
-// Prefix with NEXT_PUBLIC_ — this exposes the value to the browser
+// Prefix with NEXT_PUBLIC_, this exposes the value to the browser
 const publicValue = process.env.NEXT_PUBLIC_SOME_VALUE;
 ```
 

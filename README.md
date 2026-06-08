@@ -8,8 +8,8 @@ A personal library of reusable [Claude Code](https://docs.anthropic.com/en/docs/
 
 Two kinds of Claude Code extension:
 
-- **Skills** (`skills/<name>/SKILL.md`) — reusable instructions Claude loads when they're relevant. Modern Claude Code has a single Skill concept: a skill is both model-invoked (Claude reads its description and uses it when it fits) and user-invoked (you can run it directly with `/<name>`). There is no longer a separate "command" type, and the old `/project:<name>` / `/user:<name>` syntax is gone.
-- **Hooks** (`hooks/`) — small scripts the Claude Code harness runs mechanically on an event (configured in `settings.json`). Because the harness runs them, not the model, they fire reliably every time. Hooks are not skills and are not symlinked into `~/.claude/skills/`; you wire them up in your settings.
+- **Skills** (`skills/<name>/SKILL.md`). Reusable instructions Claude loads when they're relevant. Claude Code now has just one Skill concept: a skill is both model-invoked (Claude reads its description and uses it when it fits) and user-invoked (you run it directly with `/<name>`). There's no separate "command" type anymore, and the old `/project:<name>` / `/user:<name>` syntax is gone.
+- **Hooks** (`hooks/`). Small scripts the Claude Code harness runs automatically on an event (configured in `settings.json`). Because the harness runs them and not the model, they fire reliably every time. Hooks aren't skills and don't get symlinked into `~/.claude/skills/`; you wire them up in your settings.
 
 ## Skills
 
@@ -32,7 +32,7 @@ The automatic "what changed" feed. A `PostToolUse` hook that appends one terse, 
 
 ## The two-tier documentation system
 
-`doc-logging` and `activity-log` are designed to work together to answer "what is going on with my code?" at two levels:
+`doc-logging` and `activity-log` work together to answer "what's going on with my code?" at two levels:
 
 - The **`activity-log` hook** gives you the always-on, reliable *feed*: every change, as it happens, terse.
 - The **`doc-logging` skill** gives you the *depth* on demand: the "why" behind a change and the big-picture map, the parts a script cannot produce.

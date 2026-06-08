@@ -47,7 +47,7 @@ The single most important decision in a RAG pipeline. Bad chunks = bad retrieval
 
 **Principles:**
 - Chunk at logical boundaries (functions, paragraphs, sections), not arbitrary character counts
-- Each chunk should be independently meaningful — a reader should understand it without surrounding context
+- Each chunk should be independently meaningful, so a reader can understand it without surrounding context
 - Include enough context in metadata to locate the chunk in the original file
 - Preserve overlap between adjacent chunks to avoid losing context at boundaries
 
@@ -55,7 +55,7 @@ The single most important decision in a RAG pipeline. Bad chunks = bad retrieval
 
 Different languages have different natural boundaries. Always prefer structural boundaries over arbitrary splits:
 
-- **COBOL:** Chunk at the paragraph level (within PROCEDURE DIVISION). COBOL's rigid hierarchy — DIVISION → SECTION → PARAGRAPH — makes paragraphs a natural sweet spot.
+- **COBOL:** Chunk at the paragraph level (within PROCEDURE DIVISION). COBOL's rigid hierarchy (DIVISION → SECTION → PARAGRAPH) makes paragraphs a natural sweet spot.
 - **Python:** Chunk at function/class level using AST parsing or regex for `def`/`class` boundaries.
 - **JavaScript/TypeScript:** Chunk at function/class/module export boundaries.
 - **C:** Chunk at function definitions, using `{` `}` brace matching.
@@ -153,7 +153,7 @@ def embed_texts(texts: list[str], model: str = "text-embedding-3-small") -> list
     return [item.embedding for item in response.data]
 ```
 
-**Batch efficiently.** Don't embed one chunk at a time — batch them. OpenAI allows up to 2048 texts per API call. Process in batches of 100-500 for a good balance of speed and memory.
+**Batch efficiently.** Don't embed one chunk at a time, batch them. OpenAI allows up to 2048 texts per API call. Process in batches of 100-500 for a good balance of speed and memory.
 
 **Track costs.** Count tokens before embedding to estimate costs. For `text-embedding-3-small` the cost has historically been around $0.02 per 1M tokens, but pricing changes, so check OpenAI's current rates rather than trusting this number.
 
@@ -269,7 +269,7 @@ async def generate_answer(question: str, context: str) -> str:
 
 **Problem: Retrieval returns irrelevant chunks**
 - Check that query embedding uses the SAME model as ingestion embeddings
-- Check chunk quality — are chunks too large (diluted meaning) or too small (no context)?
+- Check chunk quality: are chunks too large (diluted meaning) or too small (no context)?
 - Try rephrasing the query or adding query expansion
 
 **Problem: Embedding dimension mismatch**

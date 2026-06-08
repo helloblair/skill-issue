@@ -16,7 +16,7 @@ This skill is the **deliberate, deep-dive half** of a two-part system:
 
 ## What To Do When Invoked
 
-When the user invokes this skill, APPEND to both files below, covering the most recent meaningful set of changes. These are append-only logs — never overwrite or delete existing content.
+When the user invokes this skill, APPEND to both files below, covering the most recent meaningful set of changes. These are append-only logs, never overwrite or delete existing content.
 
 If the user named a specific change or topic, scope the entry to that. Otherwise, review the recent conversation and the activity log to reconstruct what was done.
 
@@ -38,7 +38,7 @@ Append an entry in this exact format:
 [2-3 sentences on what was built, fixed, or modified]
 
 **Engineering Rationale:**
-[Why this approach was chosen. What tradeoffs were considered. What was rejected and why. Be specific — this is interview prep material.]
+[Why this approach was chosen. What tradeoffs were considered. What was rejected and why. Be specific. This is interview prep material.]
 
 **Impact:**
 [What this unlocks, fixes, or unblocks]
